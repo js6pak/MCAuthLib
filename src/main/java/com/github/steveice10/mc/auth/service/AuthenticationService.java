@@ -20,6 +20,7 @@ public class AuthenticationService {
     private static final String AUTHENTICATE_URL = BASE_URL + "authenticate";
     private static final String REFRESH_URL = BASE_URL + "refresh";
     private static final String INVALIDATE_URL = BASE_URL + "invalidate";
+    private static final String VALIDATE_URL = BASE_URL + "validate";
 
     private String clientToken;
     private Proxy proxy;
@@ -238,6 +239,32 @@ public class AuthenticationService {
         this.properties.clear();
         this.profiles.clear();
         this.selectedProfile = null;
+    }
+
+    /**
+     * Checks token validity without client token.
+     *
+     * @return True if token is valid, false otherwise
+     */
+    public boolean checkTokenValidity() {
+        return checkTokenValidity(false);
+    }
+
+    /**
+     * Checks token validity.
+     *
+     * @param provideClientToken Provide client token (not required)
+     * @return True if token is valid, false otherwise
+     */
+    public boolean checkTokenValidity(boolean provideClientToken) {
+        InvalidateRequest request = new InvalidateRequest(provideClientToken ? this.clientToken : null, this.accessToken);
+
+        try {
+            HTTP.makeRequest(this.proxy, VALIDATE_URL, request);
+            return true;
+        } catch (RequestException var3) {
+            return false;
+        }
     }
 
     /**
